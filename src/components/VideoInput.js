@@ -1,6 +1,8 @@
 import React, { Component } from 'react'
 import { withRouter } from 'react-router-dom'
 import Webcam from 'react-webcam'
+import Camera from 'react-html5-camera-photo'
+import 'react-html5-camera-photo/build/css/index.css'
 import { Spin, Alert } from 'antd'
 import { loadModels, getFullFaceDescription, createMatcher } from '../api/face'
 
@@ -10,6 +12,7 @@ const JSON_PROFILE = require('../descriptors/face-db.json')
 const WIDTH = 420
 const HEIGHT = 420
 const inputSize = 160
+const face_scan_interval = 200  // ms
 
 class VideoInput extends Component {
   constructor(props) {
@@ -26,94 +29,87 @@ class VideoInput extends Component {
     }
   }
 
-  componentWillMount = async () => {
+  async componentWillMount() {
     await loadModels()
-    this.setState({ faceMatcher: await createMatcher(JSON_PROFILE), loading: false })
-    this.setInputDevice()
+    let faceMatcher = await createMatcher(JSON_PROFILE)
+    this.setState({ faceMatcher: faceMatcher, loading: false })
+    await this.setInputDevice()
   }
 
-  setInputDevice = () => {
-    navigator.mediaDevices.enumerateDevices().then(async devices => {
-      let inputDevice = await devices.filter(
-        device => device.kind === 'videoinput'
-      )
-      if (inputDevice.length < 2) {
-        await this.setState({
-          facingMode: 'user'
-        })
-      } else {
-        await this.setState({
-          facingMode: { exact: 'environment' }
-        })
-      }
-      this.startCapture()
-    })
+  async setInputDevice() {
+    let devices = await navigator.mediaDevices.enumerateDevices()
+    devices = devices.filter(device => device.kind === 'videoinput')
+    let state = {facingMode: {exact: 'environment'}}
+    if (devices.length < 2) {
+      state.facingMode = 'user'
+    }
+    this.setState(state)
+    this.startCapture()
   }
 
-  startCapture = () => {
+  startCapture() {
     this.interval = setInterval(() => {
       this.capture()
-    }, 1500)
+    }, face_scan_interval)
   }
 
   componentWillUnmount() {
     clearInterval(this.interval)
   }
 
-  capture = async () => {
-    if (!!this.webcam.current) {
-      await getFullFaceDescription(
-        this.webcam.current.getScreenshot(),
-        inputSize
-      ).then(fullDesc => {
-        if (!!fullDesc) {
-          this.setState({
-            detections: fullDesc.map(fd => fd.detection),
-            descriptors: fullDesc.map(fd => fd.descriptor)
-          })
-        }
+  async capture() {
+    if (!this.webcam.current) {
+      return null
+    }
+    let fullDesc = await getFullFaceDescription(
+      // this.webcam.current.getScreenshot(),
+      this.webcam.current.libCameraPhoto.getDataUri({}),
+      inputSize
+    )
+    if (!!fullDesc) {
+      this.setState({
+        detections: fullDesc.map(fd => fd.detection),
+        descriptors: fullDesc.map(fd => fd.descriptor)
       })
+    }
 
-      if (!!this.state.descriptors && !!this.state.faceMatcher) {
-        let match = await this.state.descriptors.map(descriptor =>
-          this.state.faceMatcher.findBestMatch(descriptor)
-        )
-        this.setState({ match })
-      }
+    if (!!this.state.descriptors && !!this.state.faceMatcher) {
+      let match = this.state.descriptors.map(descriptor =>
+        this.state.faceMatcher.findBestMatch(descriptor)
+      )
+      this.setState({ match })
     }
   }
 
   render() {
-    const { detections, match, facingMode, loading } = this.state
-    let videoConstraints = null
-    let camera = ''
-    if (!!facingMode) {
-      videoConstraints = {
-        width: WIDTH,
-        height: HEIGHT,
-        facingMode: facingMode
-      }
-      if (facingMode === 'user') {
-        camera = 'Front'
-      } else {
-        camera = 'Back'
-      }
-    }
-    
-    if (loading) {
+    if (this.state.loading) {
       return (
         <Spin tip="Loading..." delay="200" size="large">
           <Alert 
             message="模型加载中"
-            description="第一次打开时间可能较长"
+            description="第一次打开时间可能较长，如果一直在加载，这边推荐亲科学上网..."
             type="info"
           />
         </Spin>
       )
     }
 
+    const { detections, match, facingMode } = this.state
+    
+    let videoConstraints = null
+    let camera = facingMode == 'user'? 'Front' : 'Back'
+    if (facingMode) {
+      videoConstraints = {
+        width: WIDTH,
+        height: HEIGHT,
+        facingMode: facingMode
+      }
+    }
+
     let drawBox = null
-    if (!!detections) {
+
+    // draw bounding box
+    if (detections) {
       drawBox = detections.map((detection, i) => {
         let _H = detection.box.height
         let _W = detection.box.width
@@ -140,7 +136,7 @@ class VideoInput extends Component {
                     width: _W,
                     marginTop: 0,
                     color: '#fff',
-                    transform: `translate(-3px,${_H}px)`
+                    transform: `translate(0px,${_H}px)`
                   }}
                 >
                   {match[i]._label}
@@ -162,27 +158,18 @@ class VideoInput extends Component {
         }}
       >
         <p>Camera: {camera}</p>
-        <div
-          style={{
-            width: WIDTH,
-            height: HEIGHT
-          }}
-        >
-          <div style={{ position: 'relative', width: WIDTH }}>
-            {!!videoConstraints ? (
-              <div style={{ position: 'absolute' }}>
-                <Webcam
-                  audio={false}
-                  width={WIDTH}
-                  height={HEIGHT}
-                  ref={this.webcam}
-                  screenshotFormat="image/jpeg"
-                  videoConstraints={videoConstraints}
-                />
-              </div>
-            ) : null}
-            {!!drawBox ? drawBox : null}
-          </div>
+        <div style={{ position: 'relative'}}>
+          {videoConstraints ? (
+            <div className="inner" style={{ position: 'absolute', transform: "translateX(-50%)" }}>
+              <Camera
+                audio={false}
+                ref={this.webcam}
+                screenshotFormat="image/jpeg"
+                // videoConstraints={videoConstraints}
+              />
+            </div>
+          ) : null}
+          {drawBox}
         </div>
       </div>
     )

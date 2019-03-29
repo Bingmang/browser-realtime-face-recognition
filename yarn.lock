@@ -6005,6 +6005,11 @@ jsesc@~0.5.0:
   resolved "http://registry.npm.taobao.org/jsesc/download/jsesc-0.5.0.tgz#e7dee66e35d6fc16f710fe91d5cf69f70f08911d"
   integrity sha1-597mbjXW/Bb3EP6R1c9p9w8IkR0=
 
+jslib-html5-camera-photo@^3.0.2-beta.0:
+  version "3.0.2-beta.0"
+  resolved "http://registry.npm.taobao.org/jslib-html5-camera-photo/download/jslib-html5-camera-photo-3.0.2-beta.0.tgz#f395a2f3d55521b208967328d3d515a69889e9ef"
+  integrity sha1-85Wi89VVIbIIlnMo09UVppiJ6e8=
+
 json-parse-better-errors@^1.0.1, json-parse-better-errors@^1.0.2:
   version "1.0.2"
   resolved "http://registry.npm.taobao.org/json-parse-better-errors/download/json-parse-better-errors-1.0.2.tgz#bb867cfb3450e69107c131d1c514bab3dc8bcaa9"
@@ -8863,6 +8868,13 @@ react-error-overlay@^5.1.4:
   version "5.1.4"
   resolved "http://registry.npm.taobao.org/react-error-overlay/download/react-error-overlay-5.1.4.tgz#88dfb88857c18ceb3b9f95076f850d7121776991"
   integrity sha1-iN+4iFfBjOs7n5UHb4UNcSF3aZE=
+
+react-html5-camera-photo@^1.3.0:
+  version "1.3.0"
+  resolved "http://registry.npm.taobao.org/react-html5-camera-photo/download/react-html5-camera-photo-1.3.0.tgz#590dec7cdda96b09c5e76d46a6056df6aa36f140"
+  integrity sha1-WQ3sfN2pawnF521GpgVt9qo28UA=
+  dependencies:
+    jslib-html5-camera-photo "^3.0.2-beta.0"
 
 react-is@^16.7.0, react-is@^16.8.1:
   version "16.8.6"
