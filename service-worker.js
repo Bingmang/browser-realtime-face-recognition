@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/3.6.3/workbox-sw.js");
 
 importScripts(
-  "/browser-real-timeface-recognition/precache-manifest.9042fdbfe0aa5c4e3ad6f856ce5b32f2.js"
+  "/browser-realtime-face-recognition/precache-manifest.dd5b12c6f3512dd9ad83eac8a95eea72.js"
 );
 
 workbox.clientsClaim();
@@ -28,7 +28,7 @@ self.__precacheManifest = [].concat(self.__precacheManifest || []);
 workbox.precaching.suppressWarnings();
 workbox.precaching.precacheAndRoute(self.__precacheManifest, {});
 
-workbox.routing.registerNavigationRoute("/browser-real-timeface-recognition/index.html", {
+workbox.routing.registerNavigationRoute("/browser-realtime-face-recognition/index.html", {
   
   blacklist: [/^\/_/,/\/[^\/]+\.[^\/]+$/],
 });
