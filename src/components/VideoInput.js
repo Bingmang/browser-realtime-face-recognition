@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import { withRouter } from 'react-router-dom'
-import Webcam from 'react-webcam'
 import Camera from 'react-html5-camera-photo'
 import 'react-html5-camera-photo/build/css/index.css'
 import { Spin, Alert } from 'antd'
@@ -62,7 +61,6 @@ class VideoInput extends Component {
       return null
     }
     let fullDesc = await getFullFaceDescription(
-      // this.webcam.current.getScreenshot(),
       this.webcam.current.libCameraPhoto.getDataUri({}),
       inputSize
     )
@@ -97,7 +95,7 @@ class VideoInput extends Component {
     const { detections, match, facingMode } = this.state
     
     let videoConstraints = null
-    let camera = facingMode == 'user'? 'Front' : 'Back'
+    let camera = facingMode === 'user'? 'Front' : 'Back'
     if (facingMode) {
       videoConstraints = {
         width: WIDTH,
@@ -154,13 +152,13 @@ class VideoInput extends Component {
         style={{
           display: 'flex',
           flexDirection: 'column',
-          alignItems: 'center'
+          // alignItems: 'center'
         }}
       >
         <p>Camera: {camera}</p>
         <div style={{ position: 'relative'}}>
           {videoConstraints ? (
-            <div className="inner" style={{ position: 'absolute', transform: "translateX(-50%)" }}>
+            <div className="inner" style={{ position: 'absolute' }}>
               <Camera
                 audio={false}
                 ref={this.webcam}
